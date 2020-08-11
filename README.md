@@ -47,10 +47,10 @@ return [
 ## Usage
 
 The `@DeprecatedRoute` annotation extends `Symfony Route`, and lets you mark an endpoint as deprecated and/or expired (and optionally make the endpoint inaccessible) by exposing these options: 
-- `since` is a date value that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
+- `since` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `until` is a date value that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
+- `until` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
 - `enforce` is a boolean value that defines if the route must become unresponsive after the `until` date. In this case a `GoneHttpException` is thrown with HTTP Status 410 Gone.
@@ -98,7 +98,7 @@ class TestController extends AbstractController{
 ---
 **NOTE**
 
-In case of conflict between the `@DeprecatedRoute` annotations of Class and Method, the Method annotation takes precedence. 
+In case of conflict between the `@DeprecatedRoute` annotations of class and method, the method annotation takes precedence. 
 
 ---
 

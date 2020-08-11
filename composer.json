@@ -9,6 +9,16 @@
             "email": "marco@braaains.no"
         }
     ],
+    "keywords": [
+        "route",
+        "deprecation",
+        "sunset",
+        "header",
+        "symfony"
+    ],
+    "support": {
+        "issues": "https://github.com/halloverden/symfony-route-deprecation-bundle/issues"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -17,7 +27,6 @@
         "symfony/dependency-injection": "^4.4.7|^5.0.7",
         "symfony/config": "^4.4.7|^5.0.7",
         "jms/serializer-bundle": "^3.5"
-
     },
     "autoload": {
         "psr-4": {

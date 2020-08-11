@@ -46,7 +46,7 @@ return [
 
 ## Usage
 
-The `@DeprecatedRoute` annotation extends `Symfony Route`, and lets you mark an endpoint as deprecated and/or expired (and optionally make the endpoint inaccessible) by exposing these options: 
+The `@DeprecatedRoute` annotation extends `Symfony\Component\Routing\Annotation\Route`, and lets you mark an endpoint as deprecated and/or expired (and optionally make the endpoint inaccessible) by exposing these options: 
 - `since` is a date value that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  

@@ -1,5 +1,6 @@
-HalloVerdenRouteDeprecationBundle
+Route Deprecation Bundle
 ==============================
+The Route Deprecation Bundle provides annotations to deprecate routes in your application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
 
 Installation
 ============
@@ -42,10 +43,18 @@ return [
     HalloVerden\RouteDeprecationBundle\HalloVerdenRouteDeprecationBundle::class => ['all' => true],
 ];
 ```
+
 ## Usage
-### DeprecatedRoute Annotation
-An annotation that extends Symfony Route and is to be used in Controllers to define the moment in which a route is deprecated and/or expired. In this case it also becomes unresponsive if the value of `enforce` is true.
-The values of `since` and `until` regulate the values of the deprecation headers, as described in [The Deprecation HTTP Header Field IETF draft](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html)
+
+The `@DeprecatedRoute` annotation extends `Symfony Route`, and lets you mark an endpoint as deprecated and/or expired (and optionally make the endpoint inaccessible) by exposing these options: 
+- `since` is a date value that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
+ `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
+ 
+- `until` is a date value that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
+  `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
+  
+- `enforce` is a boolean value that defines if the route must become unresponsive after the `until` date. In this case a `GoneHttpException` is thrown with HTTP Status 410 Gone.
+
 ```php
 namespace App\Controller;
 
@@ -57,21 +66,12 @@ class TestController extends AbstractController {
    * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=false)
    */
   public function test() {
-    // Controller stuff
+    // Controller method stuff
   }
 }
 ```
-As seen above, there are three more values when defining a `@DeprecatedRoute`:
-```
-since="01-01-2020", until="01-06-2020", enforce=false
-```
-- `since` is a date value that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, in this case:
- `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
-- `until` is a date value that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, in this case:
-  `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
-- `enforce` is a boolean value that defines if the route must become unresponsive after the `until` date. In this case a GoneHttpException is thrown with HTTP Status 410 Gone.
  
-Moreover, the annotation `DeprecatedRoute` can also be used for the whole Controller class:
+The annotation can also be used for the controller:
 
 ```php
 namespace App\Controller;
@@ -89,9 +89,10 @@ class TestController extends AbstractController{
    * @Route("/test")
    */
   public function test() {
-    // Controller stuff
+    // Controller method stuff
   }
 }
+
 ```
 
 ---

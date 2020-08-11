@@ -1,0 +1,27 @@
+{
+    "name": "halloverden/symfony-route-deprecation-bundle",
+    "description": "Route Deprecation enabled through annotation",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marco Giannetti",
+            "email": "marco@braaains.no"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php":"^7.2",
+        "symfony/http-kernel": "^4.4.7|^5.0.7",
+        "symfony/dependency-injection": "^4.4.7|^5.0.7",
+        "symfony/config": "^4.4.7|^5.0.7",
+        "jms/serializer-bundle": "^3.5"
+
+    },
+    "autoload": {
+        "psr-4": {
+            "HalloVerden\\RouteDeprecationBundle\\": ""
+        }
+    }
+}

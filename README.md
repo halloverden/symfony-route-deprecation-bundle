@@ -45,25 +45,20 @@ return [
 ## Usage
 ### DeprecatedRoute Annotation
 An annotation that extends Symfony Route and is to be used in Controllers to define the moment in which a route is deprecated and/or expired. In this case it also becomes unresponsive if the value of `enforce` is true.
-The values of `since` and `until` regulate the values of the deprecation headers, as described in: https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html
+The values of `since` and `until` regulate the values of the deprecation headers, as described in [The Deprecation HTTP Header Field IETF draft](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html)
 ```php
 namespace App\Controller;
 
 use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class TestController extends AbstractController
-{
-    /**
-     * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=false)
-     */
-    public function test()
-    {
-        return $this->json([
-            'message' => 'Test',
-            'path' => 'src/Controller/TestController.php',
-        ]);
-    }
+class TestController extends AbstractController {
+  /**
+   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=false)
+   */
+  public function test() {
+    // Controller stuff
+  }
 }
 ```
 As seen above, there are three more values when defining a `@DeprecatedRoute`:
@@ -88,20 +83,14 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=true)
  */
-class TestController extends AbstractController
-{
-
+class TestController extends AbstractController{
 
   /**
    * @Route("/test")
    */
-  public function test()
-    {
-        return $this->json([
-            'message' => 'Test',
-            'path' => 'src/Controller/TestController.php',
-        ]);
-    }
+  public function test() {
+    // Controller stuff
+  }
 }
 ```
 

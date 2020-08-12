@@ -52,6 +52,15 @@ class DeprecatedRoute extends Route {
       $this->enforce = $data['enforce'];
       unset($data['enforce']);
     }
+    if ($this->since) {
+      $data['defaults']['since'] = $this->since;
+    }
+    if($this->until) {
+      $data['defaults']['until'] = $this->until;
+    }
+    if ($this->enforce){
+      $data['defaults']['enforce'] = $this->enforce;
+    }
 
     parent::__construct($data);
   }

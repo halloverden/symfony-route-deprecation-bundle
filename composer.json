@@ -26,7 +26,6 @@
         "symfony/http-kernel": "^4.4.7|^5.0.7",
         "symfony/dependency-injection": "^4.4.7|^5.0.7",
         "symfony/config": "^4.4.7|^5.0.7",
-        "doctrine/annotations": "^1.10",
         "symfony/routing": "^4.4.7|^5.0.7"
     },
     "autoload": {

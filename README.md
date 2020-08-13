@@ -48,13 +48,13 @@ return [
 
 You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
  
-- `_deprecated_since` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
+- `_deprecated_since` is a `string ("dd-mm-yyyy")` that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
+- `_deprecated_until` is a `string ("dd-mm-yyyy")` that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
-- `_enforce_deprecation` is a boolean value that defines if the route is inaccessible after the `_deprecated_until` date. In this case a `GoneHttpException` is thrown with HTTP Status 410 Gone.
+- `_enforce_deprecation` is a `boolean` that defines if the route is inaccessible after the `_deprecated_until` date. In this case a `GoneHttpException` is thrown with HTTP Status 410 Gone.
 
 You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
 

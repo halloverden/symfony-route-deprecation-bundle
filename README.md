@@ -58,6 +58,27 @@ You can deprecate a route in any route definition (annotation, yaml, xml, php, w
 
 You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
 
+Example using annotations:
+
+```php
+namespace App\Controller;
+
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+/**
+ * @Route("/", options={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=false)
+ */
+class TestController extends AbstractController {
+  /**
+   * @Route("/test", methods={"GET"}, name="test", options={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=true)
+   */
+  public function test() {
+    // Controller method stuff
+  }
+}
+```
+
 ### @DeprecatedRoute annotation
 The bundle also ships with a handy new annotation, called `@DeprecatedRoute`, and is used like so:
 
@@ -68,11 +89,11 @@ use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=true)
+ * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=false)
  */
 class TestController extends AbstractController {
   /**
-   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=false)
+   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=true)
    */
   public function test() {
     // Controller method stuff

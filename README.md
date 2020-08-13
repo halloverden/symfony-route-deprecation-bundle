@@ -1,6 +1,6 @@
 Route Deprecation Bundle
 ==============================
-The Route Deprecation Bundle provides annotations to deprecate routes in your application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
+The Route Deprecation Bundle provides annotations to deprecate routes in your Symfony application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
 
 Installation
 ============
@@ -46,59 +46,62 @@ return [
 
 ## Usage
 
-The `@DeprecatedRoute` annotation extends `Symfony\Component\Routing\Annotation\Route`, and lets you mark an endpoint as deprecated and/or expired (and optionally make the endpoint inaccessible) by exposing these options: 
-- `since` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
+You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
+ 
+- `_deprecated_since` is a `string ("dd-mm-yyyy")` that defines the moment in which a route becomes deprecated. If the current date is equal or greater than the value of since, the header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `until` is a date value `(dd-mm-yyyy)` that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
+- `_deprecated_until` is a `string ("dd-mm-yyyy")` that defines the moment in which a route becomes expired. If the current date is equal or greater than the value of until, the header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
-- `enforce` is a boolean value that defines if the route must become unresponsive after the `until` date. In this case a `GoneHttpException` is thrown with HTTP Status 410 Gone.
+- `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true`, a `GoneHttpException` is thrown with HTTP Status 410 Gone.
+
+You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
+
+Example using annotations:
 
 ```php
 namespace App\Controller;
 
-use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-class TestController extends AbstractController {
-  /**
-   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=false)
-   */
-  public function test() {
-    // Controller method stuff
-  }
-}
-```
- 
-The annotation can also be used for the controller:
-
-```php
-namespace App\Controller;
-
-use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=true)
+ * @Route("/", defaults={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=false)
  */
-class TestController extends AbstractController{
-
+class TestController extends AbstractController {
   /**
-   * @Route("/test")
+   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=true)
    */
   public function test() {
     // Controller method stuff
   }
 }
-
 ```
 
----
-**NOTE**
+### @DeprecatedRoute annotation
+The bundle also ships with a handy new annotation, called `@DeprecatedRoute`, and is used like so:
 
-In case of conflict between the `@DeprecatedRoute` annotations of class and method, the method annotation takes precedence. 
+```php
+namespace App\Controller;
+
+use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+/**
+ * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=false)
+ */
+class TestController extends AbstractController {
+  /**
+   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=true)
+   */
+  public function test() {
+    // Controller method stuff
+  }
+}
+```
+
+It's just a convenience annotation that behind the curtains makes use of `Symfony\Component\Routing\Annotation\Route`, but it reads nice. It can be mixed with the `@Route` annotation. 
 
 ---
 

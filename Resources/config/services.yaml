@@ -1,6 +1,5 @@
 services:
-  HalloVerden\RouteDeprecationBundle\EventSubscriber\DeprecatedRouteAnnotationSubscriber:
+  HalloVerden\RouteDeprecationBundle\EventSubscriber\DeprecatedRouteSubscriber:
     tags: [{name: kernel.event_subscriber}]
     arguments:
-      $annotationReader: '@Doctrine\Common\Annotations\Reader'
       $logger: '@Psr\Log\LoggerInterface'

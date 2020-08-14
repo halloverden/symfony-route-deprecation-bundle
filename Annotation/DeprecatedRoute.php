@@ -3,6 +3,7 @@
 
 namespace HalloVerden\RouteDeprecationBundle\Annotation;
 
+use HalloVerden\RouteDeprecationBundle\EventSubscriber\DeprecatedRouteSubscriber;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -10,7 +11,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Target({"CLASS", "METHOD"})
  */
 class DeprecatedRoute extends Route {
-  const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \G\M\T';
 
   /**
    * @Required
@@ -52,54 +52,17 @@ class DeprecatedRoute extends Route {
       $this->enforce = $data['enforce'];
       unset($data['enforce']);
     }
+    if ($this->since) {
+      $data['defaults'][DeprecatedRouteSubscriber::DEPRECATION_ATTRIBUTE] = $this->since;
+    }
+    if($this->until) {
+      $data['defaults'][DeprecatedRouteSubscriber::SUNSET_ATTRIBUTE] = $this->until;
+    }
+    if ($this->enforce){
+      $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
+    }
 
     parent::__construct($data);
-  }
-
-  /**
-   * @return \DateTime
-   * @throws \Exception
-   */
-  public function getSince(): \DateTime {
-    return new \DateTime($this->since);
-  }
-
-  /**
-   * @return \DateTime
-   * @throws \Exception
-   */
-  public function getUntil(): \DateTime {
-    return new \DateTime($this->until);
-  }
-
-  /**
-   * @return bool
-   */
-  public function isEnforce(): bool {
-    return $this->enforce;
-  }
-
-  /**
-   * @return string
-   * @throws \Exception
-   */
-  public function getHttpSince(): string {
-    return $this->getSince()->format(self::HTTP_DATE_FORMAT);
-  }
-
-  /**
-   * @return string
-   * @throws \Exception
-   */
-  public function getHttpUntil(): string {
-    return $this->getUntil()->format(self::HTTP_DATE_FORMAT);
-  }
-
-  /**
-   * @return string
-   */
-  public function getName(): string {
-    return $this->name;
   }
 
 }

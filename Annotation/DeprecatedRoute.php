@@ -20,7 +20,7 @@ class DeprecatedRoute extends Route {
   private $name;
 
   /**
-   * String date dd-MM-yyyy
+   * String date yyyy-MM-dd
    * @Required
    *
    * @var string
@@ -28,7 +28,7 @@ class DeprecatedRoute extends Route {
   private $since;
 
   /**
-   * String date dd-MM-yyyy
+   * String date yyyy-MM-dd
    * @Required
    *
    * @var string

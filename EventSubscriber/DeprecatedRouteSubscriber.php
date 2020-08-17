@@ -25,6 +25,7 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
   const SUNSET_HEADER = 'Sunset';
   const ENFORCE_ATTRIBUTE = '_enforce_deprecation';
   const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \G\M\T';
+  const DATE_FORMAT_ERROR_MESSAGE = 'Wrong date format, only ISO-8601 is accepted';
 
   /**
    * @var LoggerInterface
@@ -49,7 +50,10 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
     }
     $response = $event->getResponse();
     // set date in the deprecation response header
-    $deprecationDate = new \DateTime($deprecatedSince);
+    $deprecationDate = \DateTime::createFromFormat(DATE_ATOM, $deprecatedSince);
+    if(false === $deprecationDate){
+      throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
+    }
     $response->headers->set(self::DEPRECATION_HEADER, $deprecationDate->format(self::HTTP_DATE_FORMAT));
 
     // check to see if onKernelController set a sunset attribute
@@ -57,7 +61,10 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
       return;
     }
     // set date in the sunset response header
-    $sunsetDate = new \DateTime($deprecatedUntil);
+    $sunsetDate = \DateTime::createFromFormat(DATE_ATOM, $deprecatedUntil);
+    if(false === $sunsetDate){
+      throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
+    }
     $response->headers->set(self::SUNSET_HEADER, $sunsetDate->format(self::HTTP_DATE_FORMAT));
 
     //default is false

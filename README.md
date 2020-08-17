@@ -48,10 +48,10 @@ return [
 
 You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
  
-- `_deprecated_since` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so:
+- `_deprecated_since` is a `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
+- `_deprecated_until` is a `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
 - `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
@@ -67,11 +67,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @Route("/", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=false)
+ * @Route("/", defaults={"_deprecated_since"="2020-01-01T12:00:00+00:00", "_deprecated_until"="2020-06-01T12:00:00+00:00", "_enforce_deprecation"=false)
  */
 class TestController extends AbstractController {
   /**
-   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=true)
+   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01T12:00:00+00:00", "_deprecated_until"="2020-06-01T12:00:00+00:00", "_enforce_deprecation"=true)
    */
   public function test() {
     // Controller method stuff
@@ -89,11 +89,11 @@ use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @DeprecatedRoute("/", since="2020-01-01", until="2020-06-01", enforce=false)
+ * @DeprecatedRoute("/", since="2020-01-01T12:00:00+00:00", until="2020-06-01T12:00:00+00:00", enforce=false)
  */
 class TestController extends AbstractController {
   /**
-   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="2020-01-01", until="2020-06-01", enforce=true)
+   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="2020-01-01T12:00:00+00:00", until="2020-06-01T12:00:00+00:00", enforce=true)
    */
   public function test() {
     // Controller method stuff

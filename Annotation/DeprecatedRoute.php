@@ -58,9 +58,7 @@ class DeprecatedRoute extends Route {
     if($this->until) {
       $data['defaults'][DeprecatedRouteSubscriber::SUNSET_ATTRIBUTE] = $this->until;
     }
-    if ($this->enforce){
-      $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
-    }
+    $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
 
     parent::__construct($data);
   }

@@ -67,11 +67,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @Route("/", defaults={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=false)
+ * @Route("/", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=false)
  */
 class TestController extends AbstractController {
   /**
-   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="01-01-2020", "_deprecated_until"="01-06-2020", "_enforce_deprecation"=true)
+   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=true)
    */
   public function test() {
     // Controller method stuff
@@ -89,11 +89,11 @@ use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @DeprecatedRoute("/", since="01-01-2020", until="01-06-2020", enforce=false)
+ * @DeprecatedRoute("/", since="2020-01-01", until="2020-06-01", enforce=false)
  */
 class TestController extends AbstractController {
   /**
-   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="01-01-2020", until="01-06-2020", enforce=true)
+   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="2020-01-01", until="2020-06-01", enforce=true)
    */
   public function test() {
     // Controller method stuff

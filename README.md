@@ -48,11 +48,11 @@ return [
 
 You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
  
-- `_deprecated_since` is an `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes deprecated. Other accepted formats are: `yyyy-mm-dd` (defaults to 00:00 GMT) and `yyyy-mm-dd+00:00` (defaults to 00:00 for the specified timezone).
+- `_deprecated_since` is an `ISO-8601 string ("Y-m-d\TH:i:sP")` that defines the moment in which a route becomes deprecated. Other accepted formats are: `("Y-m-d")` (defaults to 00:00 GMT) and `("Y-m-dP")` (defaults to 00:00 for the specified timezone).
 The header `Deprecation` will be set on the response, like so:
- `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
+  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is an `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes expired. Other accepted formats are: `yyyy-mm-dd` (defaults to 00:00 GMT) and `yyyy-mm-dd+00:00` (defaults to 00:00 for the specified timezone).
+- `_deprecated_until` is an `ISO-8601 string ("Y-m-d\TH:i:sP")` that defines the moment in which a route becomes expired. Other accepted formats are: `("Y-m-d")` (defaults to 00:00 GMT) and `("Y-m-dP")` (defaults to 00:00 for the specified timezone).
 The header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   

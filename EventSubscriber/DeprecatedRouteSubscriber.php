@@ -79,7 +79,7 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
    * @return \DateTime
    * @throws \Exception
    */
-  private function extractDate($inputDate): \DateTime {
+  public static function extractDate($inputDate): \DateTime {
     $utcTimeZone = new \DateTimeZone('UTC');
     $dateTime = \DateTime::createFromFormat(\DateTimeInterface::ATOM, $inputDate);
     //for other accepted formats, time must be set to midnight
@@ -92,7 +92,7 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
         $dateTime->setTime(0,0);
       }
     }
-    //if no format worked, throw an exception
+    //if none of the formats worked, throw an exception
     if (false === $dateTime) {
       throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
     }

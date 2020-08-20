@@ -20,7 +20,10 @@ class DeprecatedRoute extends Route {
   private $name;
 
   /**
-   * ISO-8601 string date yyyy-mm-ddThh:mm:ss+00:00
+   * string date Y-m-d\TH:i:sP (ATOM constant)
+   * Y-m-d (Date without timezone, defaults to 00:00 UTC)
+   * Y-m-dP (Date with timezone, defaults to 00:00)
+   *
    * @Required
    *
    * @var string
@@ -28,7 +31,10 @@ class DeprecatedRoute extends Route {
   private $since;
 
   /**
-   * ISO-8601 string date yyyy-mm-ddThh:mm:ss+00:00
+   * string date Y-m-d\TH:i:sP (ATOM constant)
+   * Y-m-d (Date without timezone, defaults to 00:00 UTC)
+   * Y-m-dP (Date with timezone, defaults to 00:00)
+   *
    * @Required
    *
    * @var string

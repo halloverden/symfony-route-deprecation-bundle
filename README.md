@@ -48,10 +48,12 @@ return [
 
 You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
  
-- `_deprecated_since` is a `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so:
+- `_deprecated_since` is an `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes deprecated. Other accepted formats are: `yyyy-mm-dd` (defaults to 00:00 GMT) and `yyyy-mm-dd+00:00` (defaults to 00:00 for the specified timezone).
+The header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is a `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
+- `_deprecated_until` is an `ISO-8601 string ("yyyy-mm-ddThh:mm:ss+00:00")` that defines the moment in which a route becomes expired. Other accepted formats are: `yyyy-mm-dd` (defaults to 00:00 GMT) and `yyyy-mm-dd+00:00` (defaults to 00:00 for the specified timezone).
+The header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
 - `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.

@@ -24,8 +24,7 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
   const SUNSET_ATTRIBUTE = '_deprecated_until';
   const SUNSET_HEADER = 'Sunset';
   const ENFORCE_ATTRIBUTE = '_enforce_deprecation';
-  const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \G\M\T';
-  const DATE_FORMAT_ERROR_MESSAGE = 'Wrong date format, only ISO-8601 is accepted';
+  const DATE_FORMAT_ERROR_MESSAGE = 'Wrong date format, review documentation for the list of accepted formats';
 
   /**
    * @var LoggerInterface
@@ -50,22 +49,16 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
     }
     $response = $event->getResponse();
     // set date in the deprecation response header
-    $deprecationDate = \DateTime::createFromFormat(DATE_ATOM, $deprecatedSince);
-    if(false === $deprecationDate){
-      throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
-    }
-    $response->headers->set(self::DEPRECATION_HEADER, $deprecationDate->format(self::HTTP_DATE_FORMAT));
+    $deprecationDate = $this->extractDate($deprecatedSince);
+    $response->headers->set(self::DEPRECATION_HEADER, $deprecationDate->format(\DateTimeInterface::RFC7231));
 
     // check to see if onKernelController set a sunset attribute
     if (!$deprecatedUntil = $event->getRequest()->attributes->get(self::SUNSET_ATTRIBUTE)) {
       return;
     }
     // set date in the sunset response header
-    $sunsetDate = \DateTime::createFromFormat(DATE_ATOM, $deprecatedUntil);
-    if(false === $sunsetDate){
-      throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
-    }
-    $response->headers->set(self::SUNSET_HEADER, $sunsetDate->format(self::HTTP_DATE_FORMAT));
+    $sunsetDate = $this->extractDate($deprecatedUntil);
+    $response->headers->set(self::SUNSET_HEADER, $sunsetDate->format(\DateTimeInterface::RFC7231));
 
     //default is false
     if (true === $event->getRequest()->attributes->get(self::ENFORCE_ATTRIBUTE) &&  new \DateTime($deprecatedUntil) < new \DateTime()) {
@@ -78,6 +71,32 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
     return [
       KernelEvents::RESPONSE => 'onKernelResponse'
     ];
+  }
+
+  /**
+   * @param string $inputDate
+   *
+   * @return \DateTime
+   * @throws \Exception
+   */
+  private function extractDate($inputDate): \DateTime {
+    $utcTimeZone = new \DateTimeZone('UTC');
+    $dateTime = \DateTime::createFromFormat(\DateTimeInterface::ATOM, $inputDate);
+    //for other accepted formats, time must be set to midnight
+    if (false === $dateTime) {
+      $dateTime = \DateTime::createFromFormat('Y-m-d', $inputDate, $utcTimeZone);
+      if (false === $dateTime) {
+        $dateTime = \DateTime::createFromFormat('Y-m-dP', $inputDate);
+      }
+      if(false !== $dateTime){
+        $dateTime->setTime(0,0);
+      }
+    }
+    //if no format worked, throw an exception
+    if (false === $dateTime) {
+      throw new \Exception(self::DATE_FORMAT_ERROR_MESSAGE);
+    }
+    return $dateTime->setTimezone($utcTimeZone);
   }
 
 }

@@ -48,15 +48,20 @@ return [
 
 You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
  
-- `_deprecated_since` is an `ISO-8601 string ("Y-m-d\TH:i:sP")` that defines the moment in which a route becomes deprecated. Other accepted formats are: `("Y-m-d")` (defaults to 00:00 GMT) and `("Y-m-dP")` (defaults to 00:00 for the specified timezone).
+- `_deprecated_since` is an ISO-8601* formatted `string` that defines the moment in which a route becomes deprecated.
 The header `Deprecation` will be set on the response, like so:
   `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is an `ISO-8601 string ("Y-m-d\TH:i:sP")` that defines the moment in which a route becomes expired. Other accepted formats are: `("Y-m-d")` (defaults to 00:00 GMT) and `("Y-m-dP")` (defaults to 00:00 for the specified timezone).
+- `_deprecated_until` is an ISO-8601* formatted `string` that defines the moment in which a route becomes expired.
 The header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
 - `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
+
+*We support three versions of the ISO-8601 format:
+- `Y-m-d\TH:i:sP`. When you need to set a specific date and time.
+- `Y-m-d`. Defaults to 00:00 GMT 
+- `Y-m-dP`. Defaults to 00:00 for the specified timezone
 
 You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
 

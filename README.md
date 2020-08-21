@@ -58,10 +58,10 @@ The header `Sunset` will be set on the response, like so:
   
 - `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
 
-*We support three versions of the ISO-8601 format:
+*Three versions of the ISO-8601 format is supported:
 - `Y-m-d\TH:i:sP`. When you need to set a specific date and time.
-- `Y-m-d`. Defaults to 00:00 GMT 
-- `Y-m-dP`. Defaults to 00:00 for the specified timezone
+- `Y-m-d`. Defaults to 00:00 GMT.
+- `Y-m-dP`. Defaults to 00:00 for the specified timezone.
 
 You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
 

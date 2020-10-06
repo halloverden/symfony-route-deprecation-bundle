@@ -1,6 +1,6 @@
 Route Deprecation Bundle
 ==============================
-The Route Deprecation Bundle provides annotations to deprecate routes in your Symfony application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
+The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
 
 Installation
 ============

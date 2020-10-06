@@ -1,6 +1,6 @@
 {
     "name": "halloverden/symfony-route-deprecation-bundle",
-    "description": "Route Deprecation enabled through annotation",
+    "description": "The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of The Deprecation HTTP Header Field.",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [

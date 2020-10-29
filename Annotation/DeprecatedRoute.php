@@ -20,7 +20,10 @@ class DeprecatedRoute extends Route {
   private $name;
 
   /**
-   * String date yyyy-MM-dd
+   * string date Y-m-d\TH:i:sP (ATOM constant)
+   * Y-m-d (Date without timezone, defaults to 00:00 UTC)
+   * Y-m-dP (Date with timezone, defaults to 00:00)
+   *
    * @Required
    *
    * @var string
@@ -28,7 +31,10 @@ class DeprecatedRoute extends Route {
   private $since;
 
   /**
-   * String date yyyy-MM-dd
+   * string date Y-m-d\TH:i:sP (ATOM constant)
+   * Y-m-d (Date without timezone, defaults to 00:00 UTC)
+   * Y-m-dP (Date with timezone, defaults to 00:00)
+   *
    * @Required
    *
    * @var string
@@ -40,6 +46,12 @@ class DeprecatedRoute extends Route {
    */
   private $enforce = false;
 
+  /**
+   * DeprecatedRoute constructor.
+   * @param array $data
+   *
+   * @throws \Exception
+   */
   public function __construct(array $data) {
     $this->name = $data['name'];
     $this->since = $data['since'];
@@ -53,14 +65,26 @@ class DeprecatedRoute extends Route {
       unset($data['enforce']);
     }
     if ($this->since) {
+      $this->checkDateValidity($this->since);
       $data['defaults'][DeprecatedRouteSubscriber::DEPRECATION_ATTRIBUTE] = $this->since;
     }
     if($this->until) {
+      $this->checkDateValidity($this->until);
       $data['defaults'][DeprecatedRouteSubscriber::SUNSET_ATTRIBUTE] = $this->until;
     }
     $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
 
     parent::__construct($data);
+  }
+
+  /**
+   * @param string $date
+   *
+   * @throws \Exception
+   */
+  private static function checkDateValidity(string $date){
+    //if no exception is thrown, date is valid
+    DeprecatedRouteSubscriber::extractDate($date);
   }
 
 }

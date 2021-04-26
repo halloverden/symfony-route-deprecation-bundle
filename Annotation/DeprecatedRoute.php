@@ -29,9 +29,8 @@ class DeprecatedRoute extends Route {
 
   /**
    * String date yyyy-MM-dd
-   * @Required
    *
-   * @var string
+   * @var string|null
    */
   private $until;
 
@@ -43,7 +42,7 @@ class DeprecatedRoute extends Route {
   public function __construct(array $data) {
     $this->name = $data['name'];
     $this->since = $data['since'];
-    $this->until = $data['until'];
+    $this->until = $data['until'] ?? null;
 
     unset($data['since']);
     unset($data['until']);

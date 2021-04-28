@@ -26,15 +26,24 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php":"^7.2",
+        "php":">=7.2",
         "symfony/http-kernel": "^v4.4.13|^v5.1.5",
         "symfony/dependency-injection": "^v4.4.13|^v5.1.5",
         "symfony/config": "^v4.4.13|^v5.1.5",
         "symfony/routing": "^v4.4.13|^v5.1.5"
     },
+    "require-dev": {
+        "symfony/framework-bundle": "^4.4.13 || ^5.1.5",
+        "symfony/phpunit-bridge": "^4.4.13 || ^5.1.5"
+    },
     "autoload": {
         "psr-4": {
-            "HalloVerden\\RouteDeprecationBundle\\": ""
+            "HalloVerden\\RouteDeprecationBundle\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HalloVerden\\RouteDeprecationBundle\\Tests\\": "tests/"
         }
     }
 }

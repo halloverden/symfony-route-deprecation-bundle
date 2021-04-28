@@ -34,7 +34,8 @@
     },
     "require-dev": {
         "symfony/framework-bundle": "^4.4.13 || ^5.1.5",
-        "symfony/phpunit-bridge": "^4.4.13 || ^5.1.5"
+        "symfony/phpunit-bridge": "^4.4.13 || ^5.1.5",
+        "symfony/test-pack": "^1.0"
     },
     "autoload": {
         "psr-4": {

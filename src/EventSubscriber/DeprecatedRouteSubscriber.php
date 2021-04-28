@@ -87,8 +87,12 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
 
   public static function getSubscribedEvents(): array {
     return [
-      [KernelEvents::CONTROLLER => 'onKernelController'],
-      KernelEvents::RESPONSE => 'onKernelResponse'
+      KernelEvents::CONTROLLER => [
+        ['onKernelController', 0]
+      ],
+      KernelEvents::RESPONSE => [
+        ['onKernelResponse', 0]
+      ]
     ];
   }
 

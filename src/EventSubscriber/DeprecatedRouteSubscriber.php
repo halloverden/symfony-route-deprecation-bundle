@@ -54,8 +54,8 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
     if (!$deprecatedUntil = $event->getRequest()->attributes->get(self::SUNSET_ATTRIBUTE)) {
       return;
     }
-
-    // default is false
+    // if SUNSET_ATTRIBUTE is not present this part is skipped
+    // default for ENFORCE_ATTRIBUTE is false
     if (true === $event->getRequest()->attributes->get(self::ENFORCE_ATTRIBUTE) &&  new \DateTime($deprecatedUntil) < new \DateTime()) {
       throw new GoneHttpException(sprintf('This route was deprecated on %s and removed on %s. It is no longer available.', $deprecatedSince, $deprecatedUntil));
     }

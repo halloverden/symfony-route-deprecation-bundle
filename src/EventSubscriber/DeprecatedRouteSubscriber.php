@@ -6,6 +6,7 @@ namespace HalloVerden\RouteDeprecationBundle\EventSubscriber;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -40,6 +41,27 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * @param ControllerEvent $event
+   *
+   * @throws \Exception
+   */
+  public function onKernelController(ControllerEvent $event) {
+    if (!$deprecatedSince = $event->getRequest()->attributes->get(self::DEPRECATION_ATTRIBUTE)) {
+      return;
+    }
+
+    // check to see if onKernelController set a sunset attribute
+    if (!$deprecatedUntil = $event->getRequest()->attributes->get(self::SUNSET_ATTRIBUTE)) {
+      return;
+    }
+    // if SUNSET_ATTRIBUTE is not present this part is skipped
+    // default for ENFORCE_ATTRIBUTE is false
+    if (true === $event->getRequest()->attributes->get(self::ENFORCE_ATTRIBUTE) &&  new \DateTime($deprecatedUntil) < new \DateTime()) {
+      throw new GoneHttpException(sprintf('This route was deprecated on %s and removed on %s. It is no longer available.', $deprecatedSince, $deprecatedUntil));
+    }
+  }
+
+  /**
    * @param ResponseEvent $event
    * @throws \Exception
    */
@@ -60,16 +82,17 @@ class DeprecatedRouteSubscriber implements EventSubscriberInterface {
     $sunsetDate = new \DateTime($deprecatedUntil);
     $response->headers->set(self::SUNSET_HEADER, $sunsetDate->format(self::HTTP_DATE_FORMAT));
 
-    //default is false
-    if (true === $event->getRequest()->attributes->get(self::ENFORCE_ATTRIBUTE) &&  new \DateTime($deprecatedUntil) < new \DateTime()) {
-      throw new GoneHttpException(sprintf('This route was deprecated from %s until %s. It is no longer available.', $deprecatedSince, $deprecatedUntil));
-    }
     $this->logger->warning(sprintf('Route %s was called. It has been deprecated since %s and will be removed on %s.', $event->getRequest()->getRequestUri(), $deprecatedSince, $deprecatedUntil));
   }
 
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
-      KernelEvents::RESPONSE => 'onKernelResponse'
+      KernelEvents::CONTROLLER => [
+        ['onKernelController', 0]
+      ],
+      KernelEvents::RESPONSE => [
+        ['onKernelResponse', 0]
+      ]
     ];
   }
 

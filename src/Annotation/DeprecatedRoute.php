@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  */
+#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class DeprecatedRoute extends Route {
 
   /**
@@ -37,20 +38,39 @@ class DeprecatedRoute extends Route {
   /**
    * @var bool
    */
-  private $enforce = false;
+  private $enforce;
 
-  public function __construct(array $data) {
-    $this->name = $data['name'];
-    $this->since = $data['since'];
-    $this->until = $data['until'] ?? null;
+  public function __construct (
+    $data = [],
+    $path = null,
+    string $name = null,
+    array $requirements = [],
+    array $options = [],
+    array $defaults = [],
+    string $host = null,
+    array $methods = [],
+    array $schemes = [],
+    string $condition = null,
+    int $priority = null,
+    string $locale = null,
+    string $format = null,
+    bool $utf8 = null,
+    bool $stateless = null,
+    string $since = null,
+    string $until = null,
+    bool $enforce = false
+  ) {
+    var_dump($data);
+    $this->name = $data['name'] ?? $name;
+    $this->since = $data['since'] ?? $since;
+    $this->until = $data['until'] ?? $until;
+    $this->enforce = $data['enforce'] ?? $enforce;
 
     unset($data['since']);
     unset($data['until']);
+    unset($data['enforce']);
 
-    if (isset($data['enforce'])) {
-      $this->enforce = $data['enforce'];
-      unset($data['enforce']);
-    }
+
     if ($this->since) {
       $data['defaults'][DeprecatedRouteSubscriber::DEPRECATION_ATTRIBUTE] = $this->since;
     }
@@ -59,7 +79,7 @@ class DeprecatedRoute extends Route {
     }
     $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
 
-    parent::__construct($data);
+    parent::__construct($data, $path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless);
   }
 
 }

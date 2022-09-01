@@ -3,44 +3,26 @@
 
 namespace HalloVerden\RouteDeprecationBundle\Annotation;
 
-use HalloVerden\RouteDeprecationBundle\EventSubscriber\DeprecatedRouteSubscriber;
+use HalloVerden\RouteDeprecationBundle\EventListener\DeprecatedRouteListener;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS", "METHOD"})
  */
 #[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class DeprecatedRoute extends Route {
+  private ?string $since;
+  private ?string $until;
+  private bool $enforce;
 
   /**
-   * @Required
+   * DeprecatedRoute constructor.
    *
-   * @var string
+   * @throws \Exception
    */
-  private $name;
-
-  /**
-   * String date yyyy-MM-dd
-   * @Required
-   *
-   * @var string
-   */
-  private $since;
-
-  /**
-   * String date yyyy-MM-dd
-   *
-   * @var string|null
-   */
-  private $until;
-
-  /**
-   * @var bool
-   */
-  private $enforce;
-
-  public function __construct (
+  public function __construct(
     $data = [],
     $path = null,
     string $name = null,
@@ -48,38 +30,53 @@ class DeprecatedRoute extends Route {
     array $options = [],
     array $defaults = [],
     string $host = null,
-    array $methods = [],
-    array $schemes = [],
+    $methods = [],
+    $schemes = [],
     string $condition = null,
     int $priority = null,
     string $locale = null,
     string $format = null,
     bool $utf8 = null,
     bool $stateless = null,
+    string $env = null,
     string $since = null,
     string $until = null,
     bool $enforce = false
   ) {
-    var_dump($data);
-    $this->name = $data['name'] ?? $name;
-    $this->since = $data['since'] ?? $since;
-    $this->until = $data['until'] ?? $until;
-    $this->enforce = $data['enforce'] ?? $enforce;
-
-    unset($data['since']);
-    unset($data['until']);
-    unset($data['enforce']);
-
-
-    if ($this->since) {
-      $data['defaults'][DeprecatedRouteSubscriber::DEPRECATION_ATTRIBUTE] = $this->since;
+    if ($since = $data['since'] ?? $since) {
+      $this->since = $defaults[DeprecatedRouteListener::DEPRECATION_ATTRIBUTE] = $since;
     }
-    if($this->until) {
-      $data['defaults'][DeprecatedRouteSubscriber::SUNSET_ATTRIBUTE] = $this->until;
+
+    if ($until = $data['until'] ?? $until) {
+      $this->until = $defaults[DeprecatedRouteListener::SUNSET_ATTRIBUTE] = $until;
     }
-    $data['defaults'][DeprecatedRouteSubscriber::ENFORCE_ATTRIBUTE] = $this->enforce;
+
+    if ($enforce = $data['enforce'] ?? $enforce) {
+      $this->enforce = $defaults[DeprecatedRouteListener::ENFORCE_ATTRIBUTE] = $enforce;
+    }
 
     parent::__construct($data, $path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless);
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getSince(): ?string {
+    return $this->since;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getUntil(): ?string {
+    return $this->until;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isEnforce(): bool {
+    return $this->enforce;
   }
 
 }

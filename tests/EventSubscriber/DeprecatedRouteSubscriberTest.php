@@ -2,7 +2,7 @@
 
 namespace HalloVerden\RouteDeprecationBundle\Tests\EventSubscriber;
 
-use HalloVerden\RouteDeprecationBundle\EventSubscriber\DeprecatedRouteSubscriber;
+use HalloVerden\RouteDeprecationBundle\EventListener\DeprecatedRouteListener;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,6 +12,9 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Class DeprecatedRouteSubscriberTest
@@ -27,14 +30,22 @@ class DeprecatedRouteSubscriberTest extends TestCase {
       $this->createMock(Kernel::class),
       function () {},
       new Request([], [], [
-        "_deprecated_since" => "2020-01-01",
-        "_deprecated_until" => "2020-06-01",
-        "_enforce_deprecation" => true
+        "_route" => "test",
       ]),
-      HttpKernelInterface::MASTER_REQUEST
+      HttpKernelInterface::MAIN_REQUEST
     );
 
-    $subscriber = new DeprecatedRouteSubscriber($this->createMock(LoggerInterface::class));
+    $routeCollection = new RouteCollection();
+    $routeCollection->add('test', new Route('/', [
+      "_deprecated_since" => "2020-01-01",
+      "_deprecated_until" => "2020-06-01",
+      "_enforce_deprecation" => true
+    ]));
+
+    $router = $this->createMock(RouterInterface::class);
+    $router->method('getRouteCollection')->willReturn($routeCollection);
+
+    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
     $this->expectException(GoneHttpException::class);
     $subscriber->onKernelController($controllerEvent);
   }
@@ -47,17 +58,25 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $responseEvent = new ResponseEvent(
       $this->createMock(Kernel::class),
       new Request([], [], [
-        "_deprecated_since" => "2020-01-01",
-        "_enforce_deprecation" => false
+        "_route" => "test",
       ]),
       HttpKernelInterface::MASTER_REQUEST,
       $response
     );
 
-    $subscriber = new DeprecatedRouteSubscriber($this->createMock(LoggerInterface::class));
+    $routeCollection = new RouteCollection();
+    $routeCollection->add('test', new Route('/', [
+      "_deprecated_since" => "2020-01-01",
+      "_enforce_deprecation" => false
+    ]));
+
+    $router = $this->createMock(RouterInterface::class);
+    $router->method('getRouteCollection')->willReturn($routeCollection);
+
+    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertTrue($response->headers->has(DeprecatedRouteSubscriber::DEPRECATION_HEADER));
+    $this->assertTrue($response->headers->has(DeprecatedRouteListener::DEPRECATION_HEADER));
   }
 
   /**
@@ -68,17 +87,25 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $responseEvent = new ResponseEvent(
       $this->createMock(Kernel::class),
       new Request([], [], [
-        "_deprecated_since" => "2020-01-01",
-        "_enforce_deprecation" => false
+        "_route" => "test",
       ]),
-      HttpKernelInterface::MASTER_REQUEST,
+      HttpKernelInterface::MAIN_REQUEST,
       $response
     );
 
-    $subscriber = new DeprecatedRouteSubscriber($this->createMock(LoggerInterface::class));
+    $routeCollection = new RouteCollection();
+    $routeCollection->add('test', new Route('/', [
+      "_deprecated_since" => "2020-01-01",
+      "_enforce_deprecation" => false
+    ]));
+
+    $router = $this->createMock(RouterInterface::class);
+    $router->method('getRouteCollection')->willReturn($routeCollection);
+
+    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertFalse($response->headers->has(DeprecatedRouteSubscriber::SUNSET_HEADER));
+    $this->assertFalse($response->headers->has(DeprecatedRouteListener::SUNSET_HEADER));
   }
 
   /**
@@ -89,17 +116,25 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $responseEvent = new ResponseEvent(
       $this->createMock(Kernel::class),
       new Request([], [], [
-        "_deprecated_since" => "2020-01-01",
-        "_deprecated_until" => "2020-06-01",
-        "_enforce_deprecation" => false
+        "_route" => "test",
       ]),
-      HttpKernelInterface::MASTER_REQUEST,
+      HttpKernelInterface::MAIN_REQUEST,
       $response
     );
 
-    $subscriber = new DeprecatedRouteSubscriber($this->createMock(LoggerInterface::class));
+    $routeCollection = new RouteCollection();
+    $routeCollection->add('test', new Route('/', [
+      "_deprecated_since" => "2020-01-01",
+      "_deprecated_until" => "2020-06-01",
+      "_enforce_deprecation" => false
+    ]));
+
+    $router = $this->createMock(RouterInterface::class);
+    $router->method('getRouteCollection')->willReturn($routeCollection);
+
+    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertTrue($response->headers->has(DeprecatedRouteSubscriber::SUNSET_HEADER));
+    $this->assertTrue($response->headers->has(DeprecatedRouteListener::SUNSET_HEADER));
   }
 }

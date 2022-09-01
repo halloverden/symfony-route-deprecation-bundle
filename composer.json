@@ -26,18 +26,11 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php":">=7.2.5",
-        "symfony/http-kernel": "^v4.4.13|^v5.1.5",
-        "symfony/dependency-injection": "^v4.4.13|^v5.1.5",
-        "symfony/config": "^v4.4.13|^v5.1.5",
-        "symfony/routing": "^v4.4.13|^v5.1.5",
-        "symfony/polyfill-php80": "^1.15",
-        "symfony/deprecation-contracts": "^2.1"
+        "php":">=8.1",
+        "symfony/framework-bundle": "^5.4|^6.0"
     },
     "require-dev": {
-        "symfony/framework-bundle": "^4.4.13 || ^5.1.5",
-        "symfony/phpunit-bridge": "^4.4.13 || ^5.1.5",
-        "symfony/test-pack": "^1.0"
+        "symfony/phpunit-bridge": "^5.4|^6.0"
     },
     "autoload": {
         "psr-4": {

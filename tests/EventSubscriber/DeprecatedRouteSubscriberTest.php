@@ -38,8 +38,8 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $routeCollection = new RouteCollection();
     $routeCollection->add('test', new Route('/', [
       "_deprecated_since" => "2020-01-01",
-      "_deprecated_until" => "2020-06-01",
-      "_enforce_deprecation" => true
+      "_sunset_at" => "2020-06-01",
+      "_enforce_sunset" => true
     ]));
 
     $router = $this->createMock(RouterInterface::class);
@@ -67,7 +67,7 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $routeCollection = new RouteCollection();
     $routeCollection->add('test', new Route('/', [
       "_deprecated_since" => "2020-01-01",
-      "_enforce_deprecation" => false
+      "_enforce_sunset" => false
     ]));
 
     $router = $this->createMock(RouterInterface::class);
@@ -96,7 +96,7 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $routeCollection = new RouteCollection();
     $routeCollection->add('test', new Route('/', [
       "_deprecated_since" => "2020-01-01",
-      "_enforce_deprecation" => false
+      "_enforce_sunset" => false
     ]));
 
     $router = $this->createMock(RouterInterface::class);
@@ -125,8 +125,8 @@ class DeprecatedRouteSubscriberTest extends TestCase {
     $routeCollection = new RouteCollection();
     $routeCollection->add('test', new Route('/', [
       "_deprecated_since" => "2020-01-01",
-      "_deprecated_until" => "2020-06-01",
-      "_enforce_deprecation" => false
+      "_sunset_at" => "2020-06-01",
+      "_enforce_sunset" => false
     ]));
 
     $router = $this->createMock(RouterInterface::class);

@@ -24,10 +24,10 @@ class DeprecatedRouteListener implements EventSubscriberInterface {
   const DEPRECATION_ATTRIBUTE = '_deprecated_since';
   const DEPRECATION_HEADER = 'Deprecation';
 
-  const SUNSET_ATTRIBUTE = '_deprecated_until';
+  const SUNSET_ATTRIBUTE = '_sunset_at';
   const SUNSET_HEADER = 'Sunset';
 
-  const ENFORCE_ATTRIBUTE = '_enforce_deprecation';
+  const ENFORCE_ATTRIBUTE = '_enforce_sunset';
 
   const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \G\M\T';
 

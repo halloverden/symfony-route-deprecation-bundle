@@ -62,16 +62,16 @@ class DeprecatedRouteListener implements EventSubscriberInterface {
       return;
     }
 
-    if (!$deprecatedSince = $this->getSunsetDate($route)) {
+    if (!$deprecatedSince = $this->getDeprecatedSince($route)) {
       return;
     }
 
-    if (!$deprecatedUntil = $this->getSunsetDate($route)) {
+    if (!$sunsetDate = $this->getSunsetDate($route)) {
       return;
     }
 
-    if (true === $this->getEnforce($route) && $deprecatedUntil < new \DateTime()) {
-      throw new GoneHttpException(sprintf('This route was deprecated on %s and removed on %s. It is no longer available.', $deprecatedSince->format('Y-m-d'),$deprecatedUntil->format('Y-m-d')));
+    if (true === $this->getEnforce($route) && $sunsetDate < new \DateTime()) {
+      throw new GoneHttpException(sprintf('This route was deprecated on %s and removed on %s. It is no longer available.', $deprecatedSince->format('Y-m-d'),$sunsetDate->format('Y-m-d')));
     }
   }
 

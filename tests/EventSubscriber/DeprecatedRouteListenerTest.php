@@ -16,12 +16,8 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- * Class DeprecatedRouteSubscriberTest
- *
- * @package HalloVerden\RouteDeprecationBundle\Tests\EventSubscriber
- */
-class DeprecatedRouteSubscriberTest extends TestCase {
+class DeprecatedRouteListenerTest extends TestCase {
+
   /**
    * @throws \Exception
    */
@@ -137,4 +133,5 @@ class DeprecatedRouteSubscriberTest extends TestCase {
 
     $this->assertTrue($response->headers->has(DeprecatedRouteListener::SUNSET_HEADER));
   }
+
 }

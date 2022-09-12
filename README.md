@@ -51,10 +51,10 @@ You can deprecate a route in any route definition (annotation, yaml, xml, php, w
 - `_deprecated_since` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so:
  `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
  
-- `_deprecated_until` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
+- `_sunset_at` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
   `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
   
-- `_enforce_deprecation` is a `boolean` that makes the route inaccessible after the `_deprecated_until` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
+- `_enforce_sunset` is a `boolean` that makes the route inaccessible after the `_sunset_at` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
 
 You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
 
@@ -67,11 +67,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @Route("/", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=false)
+ * @Route("/", defaults={"_deprecated_since"="2020-01-01", "_sunset_at"="2020-06-01", "_enforce_sunset"=false)
  */
 class TestController extends AbstractController {
   /**
-   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01", "_deprecated_until"="2020-06-01", "_enforce_deprecation"=true)
+   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01", "_sunset_at"="2020-06-01", "_enforce_sunset"=true)
    */
   public function test() {
     // Controller method stuff

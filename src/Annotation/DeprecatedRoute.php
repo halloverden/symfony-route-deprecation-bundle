@@ -4,6 +4,7 @@
 namespace HalloVerden\RouteDeprecationBundle\Annotation;
 
 use HalloVerden\RouteDeprecationBundle\EventListener\DeprecatedRouteListener;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -55,7 +56,14 @@ class DeprecatedRoute extends Route {
       $this->enforce = $defaults[DeprecatedRouteListener::ENFORCE_ATTRIBUTE] = $enforce;
     }
 
-    parent::__construct($data, $path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless);
+    if (Kernel::MAJOR_VERSION >= 6) {
+      $path ??= $data;
+      parent::__construct($path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless, $env);
+    } else {
+      parent::__construct($data, $path, $name, $requirements, $options, $defaults, $host, $methods, $schemes, $condition, $priority, $locale, $format, $utf8, $stateless, $env);
+    }
+
+
   }
 
   /**

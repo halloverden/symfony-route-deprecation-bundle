@@ -1,45 +1,48 @@
 {
-    "name": "halloverden/symfony-route-deprecation-bundle",
-    "description": "The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of The Deprecation HTTP Header Field.",
-    "type": "symfony-bundle",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Marco Giannetti",
-            "email": "marco@halloverden.no"
-        },
-        {
-            "name": "Erich Json Fosse",
-            "email": "erich@forbundspartner.no"
-        }
-    ],
-    "keywords": [
-        "route",
-        "deprecation",
-        "sunset",
-        "header",
-        "symfony"
-    ],
-    "support": {
-        "issues": "https://github.com/halloverden/symfony-route-deprecation-bundle/issues"
+  "name": "halloverden/symfony-route-deprecation-bundle",
+  "description": "The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of The Deprecation HTTP Header Field.",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marco Giannetti",
+      "email": "marco@halloverden.no"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "php":">=8.1",
-        "symfony/framework-bundle": "^5.4|^6.0"
-    },
-    "require-dev": {
-        "symfony/phpunit-bridge": "^5.4|^6.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "HalloVerden\\RouteDeprecationBundle\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "HalloVerden\\RouteDeprecationBundle\\Tests\\": "tests/"
-        }
+    {
+      "name": "Erich Json Fosse",
+      "email": "erich@forbundspartner.no"
     }
+  ],
+  "keywords": [
+    "route",
+    "deprecation",
+    "sunset",
+    "header",
+    "symfony"
+  ],
+  "support": {
+    "issues": "https://github.com/halloverden/symfony-route-deprecation-bundle/issues"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.1",
+    "symfony/framework-bundle": "^5.4|^6.4|^7.0"
+  },
+  "require-dev": {
+    "symfony/phpunit-bridge": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "HalloVerden\\RouteDeprecationBundle\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HalloVerden\\RouteDeprecationBundle\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
 }

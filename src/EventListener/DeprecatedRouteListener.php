@@ -4,37 +4,44 @@
 namespace HalloVerden\RouteDeprecationBundle\EventListener;
 
 
+use HalloVerden\RouteDeprecationBundle\Attribute\DeprecatedRoute;
 use HalloVerden\RouteDeprecationBundle\Helper\DateTimeHelper;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Clock\Clock;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Regarding the custom http headers returned in case of deprecation, see:
- * https://tools.ietf.org/html/draft-dalal-deprecation-header-02
- * https://tools.ietf.org/html/draft-wilde-sunset-header-11
+ * https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-deprecation-header
+ * https://datatracker.ietf.org/doc/html/rfc8594
  */
-class DeprecatedRouteListener implements EventSubscriberInterface {
-  const DEPRECATION_ATTRIBUTE = '_deprecated_since';
-  const DEPRECATION_HEADER = 'Deprecation';
+final class DeprecatedRouteListener implements EventSubscriberInterface {
+  private const HEADER_DEPRECATION = 'Deprecation';
+  private const HEADER_SUNSET = 'Sunset';
+  private const HEADER_LINK = 'Link';
 
-  const SUNSET_ATTRIBUTE = '_sunset_at';
-  const SUNSET_HEADER = 'Sunset';
+  public const DEFAULT_DEPRECATION_DATE_TIME_FORMAT = '@U';
+  public const DEFAULT_SUNSET_DATE_TIME_FORMAT = 'D, d M Y H:i:s \G\M\T';
 
-  const ENFORCE_ATTRIBUTE = '_enforce_sunset';
-
-  const HTTP_DATE_FORMAT = 'D, d M Y H:i:s \G\M\T';
+  private readonly ClockInterface $clock;
+  private ?DeprecatedRoute $deprecatedRoute = null;
 
   /**
    * DeprecatedRouteListener constructor.
    */
-  public function __construct(private readonly LoggerInterface $logger, private readonly RouterInterface $router) {
+  public function __construct(
+    private readonly ?LoggerInterface $logger = null,
+    private readonly string $deprecationDateTimeFormat = self::DEFAULT_DEPRECATION_DATE_TIME_FORMAT,
+    private readonly string $sunsetDateTimeFormat = self::DEFAULT_SUNSET_DATE_TIME_FORMAT,
+    private readonly ?string $deprecationLink = null,
+    private readonly ?string $sunsetLink = null,
+    ?ClockInterface $clock = null,
+  ) {
+    $this->clock = $clock ?? Clock::get();
   }
 
   /**
@@ -42,12 +49,8 @@ class DeprecatedRouteListener implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents(): array {
     return [
-      KernelEvents::CONTROLLER => [
-        ['onKernelController', 0]
-      ],
-      KernelEvents::RESPONSE => [
-        ['onKernelResponse', 0]
-      ]
+      ControllerEvent::class => 'onKernelController',
+      ResponseEvent::class => 'onKernelResponse',
     ];
   }
 
@@ -56,22 +59,33 @@ class DeprecatedRouteListener implements EventSubscriberInterface {
    *
    * @throws \Exception
    */
-  public function onKernelController(ControllerEvent $event) {
-    $route = $this->getRoute($event->getRequest());
-    if (null === $route) {
+  public function onKernelController(ControllerEvent $event): void {
+    /** @var DeprecatedRoute[] $deprecatedRoutes */
+    $deprecatedRoutes = $event->getAttributes(DeprecatedRoute::class);
+    if (empty($deprecatedRoutes)) {
       return;
     }
 
-    if (!$deprecatedSince = $this->getDeprecatedSince($route)) {
+    $routeName = $event->getRequest()->get('_route');
+    foreach ($deprecatedRoutes as $deprecatedRoute) {
+      if (null === $deprecatedRoute->name || $routeName === $deprecatedRoute->name) {
+        $this->deprecatedRoute = $deprecatedRoute;
+        break;
+      }
+    }
+
+    if (null === $this->deprecatedRoute || !$this->deprecatedRoute->enforce || null === ($sunsetDate = $this->deprecatedRoute->getSunset())) {
       return;
     }
 
-    if (!$sunsetDate = $this->getSunsetDate($route)) {
-      return;
-    }
-
-    if (true === $this->getEnforce($route) && $sunsetDate < new \DateTime()) {
-      throw new GoneHttpException(sprintf('This route was deprecated on %s and removed on %s. It is no longer available.', $deprecatedSince->format('Y-m-d'),$sunsetDate->format('Y-m-d')));
+    if (DateTimeHelper::getDateTimeFromString($this->deprecatedRoute->sunset) < $this->clock->now()) {
+      throw new GoneHttpException(
+        sprintf(
+          'This route was deprecated on %s and removed on %s. It is no longer available.',
+          $this->deprecatedRoute->getSince()->format('Y-m-d'),
+          $sunsetDate->format('Y-m-d')
+        )
+      );
     }
   }
 
@@ -79,76 +93,44 @@ class DeprecatedRouteListener implements EventSubscriberInterface {
    * @param ResponseEvent $event
    * @throws \Exception
    */
-  public function onKernelResponse(ResponseEvent $event) {
-    $route = $this->getRoute($event->getRequest());
-    if (null === $route) {
+  public function onKernelResponse(ResponseEvent $event): void {
+    if (null === $this->deprecatedRoute) {
       return;
     }
 
-    $deprecatedSince = $this->getDeprecatedSince($route);
-    if (null === $deprecatedSince) {
-      return;
-    }
-
-    $sunsetDate = $this->getSunsetDate($route);
-
-    $this->logger->warning(\sprintf('Deprecated route %s was called', $route->getPath()), [
-      'deprecatedSince' => $deprecatedSince,
-      'sunsetDate' => $sunsetDate,
-      'route' => $route->__serialize()
+    $this->logger?->warning('Deprecated route {route} ({method} {uri}) was called', [
+      'route' => $event->getRequest()->attributes->get('_route'),
+      'method' => $event->getRequest()->getMethod(),
+      'uri' => $event->getRequest()->getUri()
     ]);
 
     $response = $event->getResponse();
 
-    $response->headers->set(self::DEPRECATION_HEADER, $deprecatedSince->format(self::HTTP_DATE_FORMAT));
+    $deprecationDateTimeFormat = $this->deprecatedRoute->deprecationDateTimeFormat ?? $this->deprecationDateTimeFormat;
+    $response->headers->set(self::HEADER_DEPRECATION, $this->deprecatedRoute->getSince()->format($deprecationDateTimeFormat));
 
-    if (null !== $sunsetDate) {
-      $response->headers->set(self::SUNSET_HEADER, $sunsetDate->format(self::HTTP_DATE_FORMAT));
+    if ($deprecationLink = $this->deprecatedRoute->deprecationLink ?? $this->deprecationLink) {
+      $response->headers->set(self::HEADER_LINK, $this->createLinkHeaderValue($deprecationLink, 'deprecation'), false);
+    }
+
+    if (null !== ($sunsetDate = $this->deprecatedRoute->getSunset())) {
+      $sunsetDateTimeFormat = $this->deprecatedRoute->sunsetDateTimeFormat ?? $this->sunsetDateTimeFormat;
+      $response->headers->set(self::HEADER_SUNSET, $sunsetDate->format($sunsetDateTimeFormat));
+
+      if ($sunsetLink = $this->deprecatedRoute->sunsetLink ?? $this->sunsetLink) {
+        $response->headers->set(self::HEADER_LINK, $this->createLinkHeaderValue($sunsetLink, 'sunset'), false);
+      }
     }
   }
 
-
   /**
-   * @param Request $request
+   * @param string $link
+   * @param string $rel
    *
-   * @return Route|null
+   * @return string
    */
-  private function getRoute(Request $request): ?Route {
-    $routeName = $request->attributes->get('_route');
-    if (null === $routeName) {
-      return null;
-    }
-
-    return $this->router->getRouteCollection()->get($routeName);
-  }
-
-  /**
-   * @param Route $route
-   *
-   * @return \DateTimeInterface|null
-   * @throws \Exception
-   */
-  private function getDeprecatedSince(Route $route): ?\DateTimeInterface {
-    return $route->hasDefault(self::DEPRECATION_ATTRIBUTE) ? DateTimeHelper::getDateTimeFromString($route->getDefault(self::DEPRECATION_ATTRIBUTE)) : null;
-  }
-
-  /**
-   * @param Route $route
-   *
-   * @return \DateTimeInterface|null
-   * @throws \Exception
-   */
-  private function getSunsetDate(Route $route): ?\DateTimeInterface {
-    return $route->hasDefault(self::SUNSET_ATTRIBUTE) ? DateTimeHelper::getDateTimeFromString($route->getDefault(self::SUNSET_ATTRIBUTE)) : null;
-  }
-
-  /**
-   * @param Route $route
-   *
-   * @return bool
-   */
-  private function getEnforce(Route $route): bool {
-    return $route->getDefault(self::ENFORCE_ATTRIBUTE) ?? false;
+  private function createLinkHeaderValue(string $link, string $rel): string {
+    return \sprintf('<%s>;rel="%s";type="text/html"', $link, $rel);
   }
 
 }

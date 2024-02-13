@@ -2,9 +2,10 @@
 
 namespace HalloVerden\RouteDeprecationBundle\Tests\EventSubscriber;
 
+use HalloVerden\RouteDeprecationBundle\Attribute\DeprecatedRoute;
 use HalloVerden\RouteDeprecationBundle\EventListener\DeprecatedRouteListener;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -12,9 +13,6 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\RouterInterface;
 
 class DeprecatedRouteListenerTest extends TestCase {
 
@@ -25,23 +23,16 @@ class DeprecatedRouteListenerTest extends TestCase {
     $controllerEvent = new ControllerEvent(
       $this->createMock(Kernel::class),
       function () {},
-      new Request([], [], [
-        "_route" => "test",
-      ]),
+      new Request([], [], ["_route" => "test"]),
       HttpKernelInterface::MAIN_REQUEST
     );
 
-    $routeCollection = new RouteCollection();
-    $routeCollection->add('test', new Route('/', [
-      "_deprecated_since" => "2020-01-01",
-      "_sunset_at" => "2020-06-01",
-      "_enforce_sunset" => true
-    ]));
+    $deprecatedRoute = new DeprecatedRoute(since: '2024-02-11', sunset: '2024-02-12', enforce: true);
+    $controllerEvent->setController(function () {}, [DeprecatedRoute::class => [$deprecatedRoute]]);
 
-    $router = $this->createMock(RouterInterface::class);
-    $router->method('getRouteCollection')->willReturn($routeCollection);
+    $now = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-02-13');
+    $subscriber = new DeprecatedRouteListener(clock: new MockClock($now));
 
-    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
     $this->expectException(GoneHttpException::class);
     $subscriber->onKernelController($controllerEvent);
   }
@@ -50,88 +41,74 @@ class DeprecatedRouteListenerTest extends TestCase {
    * @throws \Exception
    */
   public function testOnKernelResponse_addsDeprecationHeader_ifRequestHasDeprecatedSinceAttribute() {
+    $kernel = $this->createMock(Kernel::class);
+    $request = new Request([], [], ["_route" => "test"]);
+    $controllerEvent = new ControllerEvent($kernel, function () {}, $request, HttpKernelInterface::MAIN_REQUEST);
+
     $response = new Response();
-    $responseEvent = new ResponseEvent(
-      $this->createMock(Kernel::class),
-      new Request([], [], [
-        "_route" => "test",
-      ]),
-      HttpKernelInterface::MASTER_REQUEST,
-      $response
-    );
+    $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
 
-    $routeCollection = new RouteCollection();
-    $routeCollection->add('test', new Route('/', [
-      "_deprecated_since" => "2020-01-01",
-      "_enforce_sunset" => false
-    ]));
 
-    $router = $this->createMock(RouterInterface::class);
-    $router->method('getRouteCollection')->willReturn($routeCollection);
+    $deprecatedRoute = new DeprecatedRoute(since: '2024-02-11');
+    $controllerEvent->setController(function () {}, [DeprecatedRoute::class => [$deprecatedRoute]]);
 
-    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
+    $now = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-02-13');
+    $subscriber = new DeprecatedRouteListener(clock: new MockClock($now));
+
+    $subscriber->onKernelController($controllerEvent);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertTrue($response->headers->has(DeprecatedRouteListener::DEPRECATION_HEADER));
+    $this->assertTrue($response->headers->has('Deprecation'));
+    $this->assertEquals('@1707609600', $response->headers->get('Deprecation'));
   }
 
   /**
    * @throws \Exception
    */
   public function testOnKernelResponse_doesNotAddSunsetHeader_ifRequestDoesNotHaveDeprecatedUntilAttribute() {
+    $kernel = $this->createMock(Kernel::class);
+    $request = new Request([], [], ["_route" => "test"]);
+    $controllerEvent = new ControllerEvent($kernel, function () {}, $request, HttpKernelInterface::MAIN_REQUEST);
+
     $response = new Response();
-    $responseEvent = new ResponseEvent(
-      $this->createMock(Kernel::class),
-      new Request([], [], [
-        "_route" => "test",
-      ]),
-      HttpKernelInterface::MAIN_REQUEST,
-      $response
-    );
+    $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
 
-    $routeCollection = new RouteCollection();
-    $routeCollection->add('test', new Route('/', [
-      "_deprecated_since" => "2020-01-01",
-      "_enforce_sunset" => false
-    ]));
 
-    $router = $this->createMock(RouterInterface::class);
-    $router->method('getRouteCollection')->willReturn($routeCollection);
+    $deprecatedRoute = new DeprecatedRoute(since: '2024-02-11');
+    $controllerEvent->setController(function () {}, [DeprecatedRoute::class => [$deprecatedRoute]]);
 
-    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
+    $now = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-02-13');
+    $subscriber = new DeprecatedRouteListener(clock: new MockClock($now));
+
+    $subscriber->onKernelController($controllerEvent);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertFalse($response->headers->has(DeprecatedRouteListener::SUNSET_HEADER));
+    $this->assertFalse($response->headers->has('Sunset'));
   }
 
   /**
    * @throws \Exception
    */
   public function testOnKernelResponse_addsSunsetHeader_ifRequestHasDeprecatedUntilAttribute() {
+    $kernel = $this->createMock(Kernel::class);
+    $request = new Request([], [], ["_route" => "test"]);
+    $controllerEvent = new ControllerEvent($kernel, function () {}, $request, HttpKernelInterface::MAIN_REQUEST);
+
     $response = new Response();
-    $responseEvent = new ResponseEvent(
-      $this->createMock(Kernel::class),
-      new Request([], [], [
-        "_route" => "test",
-      ]),
-      HttpKernelInterface::MAIN_REQUEST,
-      $response
-    );
+    $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
 
-    $routeCollection = new RouteCollection();
-    $routeCollection->add('test', new Route('/', [
-      "_deprecated_since" => "2020-01-01",
-      "_sunset_at" => "2020-06-01",
-      "_enforce_sunset" => false
-    ]));
 
-    $router = $this->createMock(RouterInterface::class);
-    $router->method('getRouteCollection')->willReturn($routeCollection);
+    $deprecatedRoute = new DeprecatedRoute(since: '2024-02-11', sunset: '2024-03-12');
+    $controllerEvent->setController(function () {}, [DeprecatedRoute::class => [$deprecatedRoute]]);
 
-    $subscriber = new DeprecatedRouteListener($this->createMock(LoggerInterface::class), $router);
+    $now = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-02-13');
+    $subscriber = new DeprecatedRouteListener(clock: new MockClock($now));
+
+    $subscriber->onKernelController($controllerEvent);
     $subscriber->onKernelResponse($responseEvent);
 
-    $this->assertTrue($response->headers->has(DeprecatedRouteListener::SUNSET_HEADER));
+    $this->assertTrue($response->headers->has('Sunset'));
+    $this->assertEquals('Tue, 12 Mar 2024 00:00:00 GMT', $response->headers->get('Sunset'));
   }
 
 }

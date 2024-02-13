@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
-class HalloVerdenRouteDeprecationBundle extends AbstractBundle {
+final class HalloVerdenRouteDeprecationBundle extends AbstractBundle {
 
   public function configure(DefinitionConfigurator $definition): void {
     $definition->rootNode()

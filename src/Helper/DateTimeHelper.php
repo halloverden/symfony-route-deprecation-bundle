@@ -2,7 +2,7 @@
 
 namespace HalloVerden\RouteDeprecationBundle\Helper;
 
-class DateTimeHelper {
+final readonly class DateTimeHelper {
   const FORMAT_DATE_ONLY = 'Y-m-d';
   const FORMAT_DATE_ONLY_WITH_TIMEZONE = 'Y-m-dP';
 

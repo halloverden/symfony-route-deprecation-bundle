@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
 
-class DeprecatedRouteListenerTest extends TestCase {
+final class DeprecatedRouteListenerTest extends TestCase {
 
   /**
    * @throws \Exception

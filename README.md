@@ -57,16 +57,7 @@ You can deprecate any route with the `DeprecatedRoute` annotation.
 - `deprecationLink` (optional) - The link used in the `Link` header for deprecation.
 - `sunsetLink` - (optional) - The link used in the `Link` header for sunset.
 
-config options (optional):
-```yaml
-hallo_verden_route_deprecation:
-    deprecation:
-        dateTimeFormat: '@U'
-        link: 'https://example.com/deprecation'
-    sunset:
-        dateTimeFormat: 'D, d M Y H:i:s \G\M\T'
-        link: 'https://example.com/sunset'
-```
+you can also deprecate any route with route parameters.
 
 Example using the attribute:
 
@@ -94,6 +85,34 @@ class GetHealthzController extends BaseController {
   }
 
 }
+```
+
+Example using route parameters in routes.yaml:
+
+```yaml
+# config/routes.yaml
+lol_healthz:
+    path: /healthz
+    controller: App\Controller\GetHealthzController
+    defaults:
+        _deprecated_since: '2024-01-01'
+        _deprecated_sunset: '2024-02-01'
+        _deprecated_enforce: false
+        _deprecated_deprecation_date_time_format: '@U'
+        _deprecated_sunset_date_time_format: 'D, d M Y H:i:s \G\M\T'
+        _deprecated_deprecation_link: 'https://example.com/deprecation'
+        _deprecated_sunset_link: 'https://example.com/sunset'
+```
+
+config options (optional):
+```yaml
+hallo_verden_route_deprecation:
+    deprecation:
+        dateTimeFormat: '@U'
+        link: 'https://example.com/deprecation'
+    sunset:
+        dateTimeFormat: 'D, d M Y H:i:s \G\M\T'
+        link: 'https://example.com/sunset'
 ```
 
 ## Contributing

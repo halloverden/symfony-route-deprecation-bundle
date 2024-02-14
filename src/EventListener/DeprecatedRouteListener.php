@@ -27,6 +27,14 @@ final class DeprecatedRouteListener implements EventSubscriberInterface {
   public const DEFAULT_DEPRECATION_DATE_TIME_FORMAT = '@U';
   public const DEFAULT_SUNSET_DATE_TIME_FORMAT = 'D, d M Y H:i:s \G\M\T';
 
+  public const ROUTE_PARAM_DEPRECATED_SINCE = '_deprecated_since';
+  public const ROUTE_PARAM_DEPRECATED_SUNSET = '_deprecated_sunset';
+  public const ROUTE_PARAM_DEPRECATED_ENFORCE = '_deprecated_enforce';
+  public const ROUTE_PARAM_DEPRECATED_DEPRECATION_DATE_TIME_FORMAT = '_deprecated_deprecation_date_time_format';
+  public const ROUTE_PARAM_DEPRECATED_SUNSET_DATE_TIME_FORMAT = '_deprecated_sunset_date_time_format';
+  public const ROUTE_PARAM_DEPRECATED_DEPRECATION_LINK = '_deprecated_deprecation_link';
+  public const ROUTE_PARAM_DEPRECATED_SUNSET_LINK = '_deprecated_sunset_link';
+
   private readonly ClockInterface $clock;
   private ?DeprecatedRoute $deprecatedRoute = null;
 
@@ -60,20 +68,7 @@ final class DeprecatedRouteListener implements EventSubscriberInterface {
    * @throws \Exception
    */
   public function onKernelController(ControllerEvent $event): void {
-    /** @var DeprecatedRoute[] $deprecatedRoutes */
-    $deprecatedRoutes = $event->getAttributes(DeprecatedRoute::class);
-    if (empty($deprecatedRoutes)) {
-      return;
-    }
-
-    $routeName = $event->getRequest()->get('_route');
-    foreach ($deprecatedRoutes as $deprecatedRoute) {
-      if (null === $deprecatedRoute->name || $routeName === $deprecatedRoute->name) {
-        $this->deprecatedRoute = $deprecatedRoute;
-        break;
-      }
-    }
-
+    $this->deprecatedRoute = $this->getDeprecatedRoute($event);
     if (null === $this->deprecatedRoute || !$this->deprecatedRoute->enforce || null === ($sunsetDate = $this->deprecatedRoute->getSunset())) {
       return;
     }
@@ -131,6 +126,40 @@ final class DeprecatedRouteListener implements EventSubscriberInterface {
    */
   private function createLinkHeaderValue(string $link, string $rel): string {
     return \sprintf('<%s>;rel="%s";type="text/html"', $link, $rel);
+  }
+
+  /**
+   * @param ControllerEvent $event
+   *
+   * @return DeprecatedRoute|null
+   */
+  private function getDeprecatedRoute(ControllerEvent $event): ?DeprecatedRoute {
+    /** @var DeprecatedRoute[] $deprecatedRoutes */
+    $deprecatedRoutes = $event->getAttributes(DeprecatedRoute::class);
+
+    $routeName = $event->getRequest()->get('_route');
+
+    foreach ($deprecatedRoutes as $deprecatedRoute) {
+      if (null === $deprecatedRoute->name || $routeName === $deprecatedRoute->name) {
+        return $deprecatedRoute;
+      }
+    }
+
+    $routeParams = $event->getRequest()->attributes->get('_route_params', []);
+    if (!isset($routeParams[self::ROUTE_PARAM_DEPRECATED_SINCE])) {
+      return null;
+    }
+
+    return new DeprecatedRoute(
+      since: $routeParams[self::ROUTE_PARAM_DEPRECATED_SINCE],
+      sunset: $routeParams[self::ROUTE_PARAM_DEPRECATED_SUNSET] ?? null,
+      enforce: $routeParams[self::ROUTE_PARAM_DEPRECATED_ENFORCE] ?? false,
+      name: $routeName,
+      deprecationDateTimeFormat: $routeParams[self::ROUTE_PARAM_DEPRECATED_DEPRECATION_DATE_TIME_FORMAT] ?? null,
+      sunsetDateTimeFormat: $routeParams[self::ROUTE_PARAM_DEPRECATED_SUNSET_DATE_TIME_FORMAT] ?? null,
+      deprecationLink: $routeParams[self::ROUTE_PARAM_DEPRECATED_DEPRECATION_LINK] ?? null,
+      sunsetLink: $routeParams[self::ROUTE_PARAM_DEPRECATED_SUNSET_LINK] ?? null,
+    );
   }
 
 }

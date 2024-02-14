@@ -87,7 +87,7 @@ class GetHealthzController extends BaseController {
 }
 ```
 
-Example using route parameters in routes.yaml:
+Example using route parameters in routes.yaml (you can also use xml, php and the route annotation):
 
 ```yaml
 # config/routes.yaml

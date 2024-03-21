@@ -1,6 +1,6 @@
 Route Deprecation Bundle
 ==============================
-The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://tools.ietf.org/id/draft-dalal-deprecation-header-03.html).  
+The Route Deprecation Bundle provides tools to deprecate routes in your Symfony application. It implements the IETF draft  of [The Deprecation HTTP Header Field](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-deprecation-header).  
 
 Installation
 ============
@@ -46,64 +46,74 @@ return [
 
 ## Usage
 
-You can deprecate a route in any route definition (annotation, yaml, xml, php, what have you) by passing three values to the `defaults` option:
- 
-- `_deprecated_since` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so:
- `Deprecation: date="Wed, 01 Jan 2020 00:00:00 GMT"`.
- 
-- `_sunset_at` is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so:
-  `Sunset: date="Mon, 01 Jun 2020 00:00:00 GMT"`.
-  
-- `_enforce_sunset` is a `boolean` that makes the route inaccessible after the `_sunset_at` date. If you try to access a route where this option is set to `true` and the current date is greater than the `_deprecated_until` date, a `GoneHttpException` is thrown.
+You can deprecate any route with the `DeprecatedRoute` annotation.
 
-You can deprecate a method / endpoint in a controller, or the controller itself (to deprecate all methods / endpoints in the controller).
+- `since` (required) - is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes deprecated. The header `Deprecation` will be set on the response, like so: `Deprecation: @1672531200`.
+- `sunset` (optional) - is a `string ("yyyy-mm-dd")` that defines the moment in which a route becomes expired. The header `Sunset` will be set on the response, like so: `Sunset: Mon, 01 Jun 2020 00:00:00 GMT`
+- `enforce` (optional) - is a `boolean` that makes the route inaccessible after the `sunset` date (default is `false`). If you try to access a route where this option is set to `true` and the current date is greater than the `sunet` date, a `GoneHttpException` is thrown.
+- `name` (optional) - The name of the route to deprecate. If not specified, all routes (on that controller) will be deprecated.
+- `deprecationDateTimeFormat` (optional) - The format of the date time used in the Deprecation header. default is `@U` (as per the IETF draft).
+- `sunsetDateTimeFormat` (optional) - The format of the date time used in the Sunset header. default is `D, d M Y H:i:s \G\M\T` (as per the Sunset RFC)
+- `deprecationLink` (optional) - The link used in the `Link` header for deprecation.
+- `sunsetLink` - (optional) - The link used in the `Link` header for sunset.
 
-Example using annotations:
+you can also deprecate any route with route parameters.
+
+Example using the attribute:
 
 ```php
+<?php
+
 namespace App\Controller;
 
+use HalloVerden\RouteDeprecationBundle\Attribute\DeprecatedRoute;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- * @Route("/", defaults={"_deprecated_since"="2020-01-01", "_sunset_at"="2020-06-01", "_enforce_sunset"=false)
- */
-class TestController extends AbstractController {
+
+#[Route(path: self::PATH, name: self::NAME, methods: ['GET'])]
+#[DeprecatedRoute(since: '2023-01-01')]
+class GetHealthzController extends BaseController {
+  const PATH = '/healthz';
+  const NAME = 'healthz_get';
+
   /**
-   * @Route("/test", methods={"GET"}, name="test", defaults={"_deprecated_since"="2020-01-01", "_sunset_at"="2020-06-01", "_enforce_sunset"=true)
+   * @return Response
    */
-  public function test() {
-    // Controller method stuff
+  public function __invoke(): Response {
+    return new Response('ok');
   }
+
 }
 ```
 
-### @DeprecatedRoute annotation
-The bundle also ships with a handy new annotation, called `@DeprecatedRoute`, and is used like so:
+Example using route parameters in routes.yaml (you can also use xml, php and the route annotation):
 
-```php
-namespace App\Controller;
-
-use HalloVerden\RouteDeprecationBundle\Annotation\DeprecatedRoute;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-/**
- * @DeprecatedRoute("/", since="2020-01-01", until="2020-06-01", enforce=false)
- */
-class TestController extends AbstractController {
-  /**
-   * @DeprecatedRoute("/test", methods={"GET"}, name="test", since="2020-01-01", until="2020-06-01", enforce=true)
-   */
-  public function test() {
-    // Controller method stuff
-  }
-}
+```yaml
+# config/routes.yaml
+lol_healthz:
+    path: /healthz
+    controller: App\Controller\GetHealthzController
+    defaults:
+        _deprecated_since: '2024-01-01'
+        _deprecated_sunset: '2024-02-01'
+        _deprecated_enforce: false
+        _deprecated_deprecation_date_time_format: '@U'
+        _deprecated_sunset_date_time_format: 'D, d M Y H:i:s \G\M\T'
+        _deprecated_deprecation_link: 'https://example.com/deprecation'
+        _deprecated_sunset_link: 'https://example.com/sunset'
 ```
 
-It's just a convenience annotation that behind the curtains makes use of `Symfony\Component\Routing\Annotation\Route`, but it reads nice. It can be mixed with the `@Route` annotation. 
-
----
+config options (optional):
+```yaml
+hallo_verden_route_deprecation:
+    deprecation:
+        dateTimeFormat: '@U'
+        link: 'https://example.com/deprecation'
+    sunset:
+        dateTimeFormat: 'D, d M Y H:i:s \G\M\T'
+        link: 'https://example.com/sunset'
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

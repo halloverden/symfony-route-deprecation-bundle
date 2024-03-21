@@ -1,7 +1,0 @@
-services:
-  hallo_verden.route_deprecation.event_listener.route_deprecation:
-    class: HalloVerden\RouteDeprecationBundle\EventListener\DeprecatedRouteListener
-    tags: [{name: kernel.event_subscriber}]
-    arguments:
-      $logger: '@logger'
-      $router: '@router'
